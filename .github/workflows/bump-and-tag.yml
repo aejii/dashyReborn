@@ -51,7 +51,7 @@ jobs:
 
           printf 'Changed files:\n%s\n' "$files"
 
-          if echo "$files" | grep -Eq '^(main\.go|go\.mod|go\.sum|conf\.sample\.yml)$|^internal/'; then
+          if echo "$files" | grep -Eq '^(main\.go|go\.mod|go\.sum|conf\.sample\.yml|Dockerfile)$|^internal/'; then
             echo "needs_tag=true" >> "$GITHUB_OUTPUT"
           else
             echo "needs_tag=false" >> "$GITHUB_OUTPUT"
