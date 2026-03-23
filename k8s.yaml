@@ -58,22 +58,59 @@ spec:
       labels:
         app: dashyreborn
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: dashyreborn
         image: aejii/dashyreborn:1.0.0
         ports:
         - containerPort: 8080
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 2
+          timeoutSeconds: 2
+          failureThreshold: 15
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          periodSeconds: 20
+          timeoutSeconds: 2
+          failureThreshold: 3
         volumeMounts:
           - mountPath: /app/conf.sample.yml
             name: dashyreborn-data
             subPath: conf.sample.yml
+            readOnly: true
+          - mountPath: /app/.cache/favicons
+            name: dashyreborn-cache
         resources:
           requests:
-            cpu: "0.01"
-            memory: "100Mi"
+            cpu: "5m"
+            memory: "64Mi"
           limits:
-            cpu: "1"
-            memory: "100Mi"
+            cpu: "50m"
+            memory: "128Mi"
       volumes:
         - name: dashyreborn-data
           configMap:
@@ -81,3 +118,5 @@ spec:
             items:
             - key: conf.yml
               path: conf.sample.yml
+        - name: dashyreborn-cache
+          emptyDir: {}
