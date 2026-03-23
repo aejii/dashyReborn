@@ -1,0 +1,10 @@
+.git
+.github
+.gocache
+.cache
+coverage
+coverage.out
+dist
+dashyreborn
+dashyreborn.exe
+conf.test.yml

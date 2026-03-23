@@ -3,7 +3,7 @@ pageInfo:
   description: Example config for Dashy Reborn
   navLinks:
     - title: Repository
-      path: https://example.com
+      path: https://github.com/aejii/dashyReborn
       target: newtab
 
 appConfig:
@@ -19,11 +19,11 @@ sections:
     items:
       - title: Grafana
         description: Metrics and dashboards
-        url: https://grafana.example.com
+        url: https://grafana.com/
         icon: si-grafana
       - title: Prometheus
         description: Time-series database
-        url: https://prometheus.example.com
+        url: https://prometheus.io/
         icon: favicon
 
   - name: Productivity

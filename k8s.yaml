@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashy-config-map
+data:
+  conf.yml: |
+    pageInfo:
+      title: Sample Dashboard
+      description: Example config for Dashy Reborn
+      navLinks:
+        - title: Repository
+          path: https://github.com/aejii/dashyReborn
+          target: newtab
+
+    appConfig:
+      theme: dracula
+      language: en
+      iconSize: medium
+      layout: auto
+      defaultOpeningMethod: newtab
+
+    sections:
+      - name: Infrastructure
+        icon: mdi-server
+        items:
+          - title: Grafana
+            description: Metrics and dashboards
+            url: https://grafana.com/
+            icon: si-grafana
+          - title: Prometheus
+            description: Time-series database
+            url: https://prometheus.io/
+            icon: favicon
+
+      - name: Productivity
+        icon: mdi-briefcase
+        items:
+          - title: Documentation
+            description: Internal docs portal
+            url: https://docs.example.com
+            icon: mdi-file-document-outline
+          - title: Tickets
+            description: Work tracking
+            url: https://tickets.example.com
+            icon: generative
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashyreborn-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashyreborn
+  template:
+    metadata:
+      labels:
+        app: dashyreborn
+    spec:
+      containers:
+      - name: dashyreborn
+        image: aejii/dashyreborn:1.0.0
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+          - mountPath: /app/conf.sample.yml
+            name: dashyreborn-data
+            subPath: conf.sample.yml
+        resources:
+          requests:
+            cpu: "0.01"
+            memory: "100Mi"
+          limits:
+            cpu: "1"
+            memory: "100Mi"
+      volumes:
+        - name: dashyreborn-data
+          configMap:
+            name: dashy-config-map
+            items:
+            - key: conf.yml
+              path: conf.sample.yml

@@ -33,7 +33,7 @@ Then open `http://127.0.0.1:8080`.
 
 If you want remote icons and other external assets enabled:
 
-```powershell
+```sh
 go run . -config .\conf.sample.yml -assets-mode auto
 ```
 
@@ -52,3 +52,29 @@ go run . -config .\conf.sample.yml -assets-mode auto
 - Default asset mode is `internal-only`
 - `icon: favicon` is cached locally on disk and then served by the app
 - `/healthz` exposes basic runtime and reload information
+
+## Docker
+
+Build:
+
+```sh
+docker build -t dashyreborn .
+```
+
+Run with the default sample config:
+
+```sh
+docker run --rm -p 8080:8080 dashyreborn
+```
+
+Override flags by appending them to `docker run`:
+
+```sh
+docker run --rm -p 8080:8080 dashyreborn -config /app/conf.sample.yml -assets-mode internal-only
+```
+
+Run with your own config file:
+
+```sh
+docker run --rm -p 8080:8080 -v "${PWD}/conf.yml:/data/conf.yml" dashyreborn
+```
