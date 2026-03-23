@@ -75,6 +75,8 @@ jobs:
     if: needs.validate.outputs.needs_tag == 'true'
     permissions:
       contents: write
+    outputs:
+      version: ${{ steps.version.outputs.next }}
 
     steps:
       - name: Checkout
@@ -131,3 +133,119 @@ jobs:
 
           git tag -a "$version" -F tag-message.txt
           git push origin "$version"
+
+  build-release:
+    name: Build ${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    needs: tag
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            archive: tar.gz
+            binary_name: dashyreborn
+          - goos: linux
+            goarch: arm64
+            archive: tar.gz
+            binary_name: dashyreborn
+          - goos: darwin
+            goarch: amd64
+            archive: tar.gz
+            binary_name: dashyreborn
+          - goos: darwin
+            goarch: arm64
+            archive: tar.gz
+            binary_name: dashyreborn
+          - goos: windows
+            goarch: amd64
+            archive: zip
+            binary_name: dashyreborn.exe
+          - goos: windows
+            goarch: arm64
+            archive: zip
+            binary_name: dashyreborn.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build archive
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+          VERSION: ${{ needs.tag.outputs.version }}
+          ARCHIVE_FORMAT: ${{ matrix.archive }}
+          BINARY_NAME: ${{ matrix.binary_name }}
+        run: |
+          set -euo pipefail
+
+          package="dashyreborn_${VERSION}_${GOOS}_${GOARCH}"
+          staging="dist/${package}"
+          mkdir -p "$staging"
+
+          go build -trimpath -ldflags "-s -w -X main.appVersion=${VERSION}" -o "$staging/$BINARY_NAME" .
+          cp readme.md "$staging/README.md"
+          cp conf.sample.yml "$staging/conf.sample.yml"
+
+          mkdir -p dist/out
+          if [ "$ARCHIVE_FORMAT" = "zip" ]; then
+            (
+              cd dist
+              zip -rq "out/${package}.zip" "${package}"
+            )
+          else
+            tar -C dist -czf "dist/out/${package}.tar.gz" "${package}"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/out/*
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - tag
+      - build-release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/artifacts
+          pattern: release-*
+          merge-multiple: true
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist/artifacts
+          sha256sum * > checksums.txt
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.tag.outputs.version }}
+          generate_release_notes: true
+          files: |
+            dist/artifacts/*
