@@ -82,7 +82,7 @@ func (r *assetRegistry) resolve(raw, baseDir string) string {
 			return resolved
 		}
 	}
-	if strings.HasPrefix(raw, "/") && r.publicDir != "" {
+	if strings.HasPrefix(raw, "/") && r.publicDir != "" && !filepath.IsAbs(raw) {
 		return "/_assets" + raw
 	}
 
