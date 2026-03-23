@@ -10,19 +10,20 @@ concurrency:
   group: auto-version-and-tag
   cancel-in-progress: false
 
-permissions:
-  contents: write
-
 jobs:
-  version-and-tag:
+  validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      needs_tag: ${{ steps.changes.outputs.needs_tag }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -68,8 +69,20 @@ jobs:
         if: steps.changes.outputs.needs_tag == 'true'
         run: go vet ./...
 
+  tag:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.needs_tag == 'true'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Compute next version
-        if: steps.changes.outputs.needs_tag == 'true'
         id: version
         shell: bash
         run: |
@@ -95,7 +108,6 @@ jobs:
           echo "next=$next" >> "$GITHUB_OUTPUT"
 
       - name: Create and push tag
-        if: steps.changes.outputs.needs_tag == 'true'
         shell: bash
         run: |
           set -euo pipefail
