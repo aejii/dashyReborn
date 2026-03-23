@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="{{ .Page.Language }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ .Page.Title }}</title>
+  {{ if .Page.ThemeFontsURL }}<link rel="stylesheet" href="{{ .Page.ThemeFontsURL }}">{{ end }}
+  {{ if .Page.LoadFontAwesome }}<link rel="stylesheet" href="{{ fontAwesomeCSSURL }}">{{ end }}
+  {{ if .Page.LoadMdi }}<link rel="stylesheet" href="{{ mdiCSSURL }}">{{ end }}
+  <style>{{ .Page.ThemeCSS }}</style>
+  <style>{{ pageCSS }}</style>
+  <style>
+    :root {
+      --page-background-overlay: {{ if .Page.BackgroundImage }}linear-gradient(180deg, rgba(5,7,14,.76), rgba(11,16,33,.92)), url('{{ .Page.BackgroundImage }}') center/cover no-repeat{{ else }}none{{ end }};
+      --page-background-opacity: {{ if .Page.BackgroundImage }}0.22{{ else }}0{{ end }};
+      --page-section-grid: {{ .Page.SectionGrid }};
+    }
+  </style>
+  {{ if and .Page.AllowCustomCSS .Page.CustomCSS }}<style>{{ .Page.CustomCSS }}</style>{{ end }}
+</head>
+<body>
+  <div id="dashy">
+    <header>
+      <a class="page-titles" href="/">
+        {{ if .Page.Logo }}<img class="site-logo" src="{{ .Page.Logo }}" alt="Logo">{{ end }}
+        <div class="text">
+          <h1>{{ .Page.Title }}</h1>
+          {{ if .Page.Description }}<span class="subtitle">{{ .Page.Description }}</span>{{ end }}
+        </div>
+      </a>
+      <div class="nav-outer">
+        <nav>
+          {{ range .Page.Tabs }}
+            <a class="nav-item {{ if .Current }}active{{ end }}" href="{{ .Path }}">{{ .Name }}</a>
+          {{ end }}
+          {{ range .Page.NavLinks }}
+            <a class="nav-item" href="{{ .Path }}" target="{{ .Target }}" rel="{{ .Rel }}">{{ .Title }}</a>
+          {{ end }}
+        </nav>
+      </div>
+    </header>
+
+    <main class="home">
+      <section class="filter-container">
+        <div class="search-card">
+          <label class="search-label" for="dashboard-search">{{ .Page.UI.SearchLabel }}</label>
+          <input id="dashboard-search" class="search-input" type="search" placeholder="{{ .Page.UI.SearchPlaceholder }}">
+        </div>
+      </section>
+
+      {{ if .Page.Sections }}
+        <div class="section-list" id="section-list">
+          {{ range .Page.Sections }}
+            <section class="collapsable" data-section>
+              <input id="toggle-{{ .ID }}" class="toggle" type="checkbox" checked data-key="{{ .ID }}">
+              <label class="lbl-toggle" for="toggle-{{ .ID }}">
+                <span class="section-icon {{ if .IconClass }}icon-font{{ end }}" data-fallback="{{ .Marker }}">
+                  {{ if .IconClass }}<i class="{{ .IconClass }}"></i>{{ else if .IconURL }}<img src="{{ .IconURL }}" alt="" onerror="this.parentElement.classList.add('icon-failed'); this.remove()">{{ else }}{{ .Marker }}{{ end }}
+                </span>
+                <h3>{{ .Name }}</h3>
+              </label>
+              <div class="collapsible-content">
+                <div class="content-inner">
+                  <div class="there-are-items">
+                    {{ range .Items }}
+                      <div class="item-wrapper wrap-size-{{ $.Page.ItemSize }}" data-filter="{{ .SearchText }}">
+                        <a class="item size-{{ $.Page.ItemSize }}" href="{{ .URL }}" target="{{ .Target }}" rel="{{ .Rel }}" {{ if .Style }}style="{{ .Style }}"{{ end }}>
+                          <div class="tile-title">
+                            {{ if .Provider }}<span class="provider-line">{{ .Provider }}</span>{{ end }}
+                            <span class="text">{{ .Title }}</span>
+                            {{ if .Description }}<p class="description">{{ .Description }}</p>{{ end }}
+                          </div>
+                          <span class="tile-icon {{ if .IconClass }}icon-font{{ end }}" data-fallback="{{ .FallbackIcon }}">
+                            {{ if .IconClass }}<i class="{{ .IconClass }}"></i>{{ else if .IconURL }}<img class="{{ if .IconIsFavicon }}favicon-image{{ end }}" src="{{ .IconURL }}" alt="" onerror="this.parentElement.classList.add('icon-failed'); this.remove()">{{ else }}{{ .FallbackIcon }}{{ end }}
+                          </span>
+                        </a>
+                        {{ if .SubItems }}
+                          <div class="sub-items-inline">
+                            {{ range .SubItems }}
+                              <a class="sub-item-pill" href="{{ .URL }}" target="{{ .Target }}" rel="{{ .Rel }}">{{ .Title }}</a>
+                            {{ end }}
+                          </div>
+                        {{ end }}
+                      </div>
+                    {{ end }}
+                    {{ range .Widgets }}
+                      <div class="widget-wrapper wrap-size-{{ $.Page.ItemSize }}" data-filter="{{ .SearchText }}">
+                        <div class="item widget-item size-{{ $.Page.ItemSize }}">
+                          <div class="tile-title">
+                            <span class="provider-line">{{ $.Page.UI.WidgetLabel }}</span>
+                            <span class="text">{{ .Label }}</span>
+                            <span class="widget-note">Type: {{ .Type }}</span>
+                          </div>
+                          <span class="tile-icon">{{ .FallbackIcon }}</span>
+                        </div>
+                      </div>
+                    {{ end }}
+                  </div>
+                </div>
+              </div>
+            </section>
+          {{ end }}
+        </div>
+        <div id="search-empty" class="empty-state" hidden>{{ .Page.UI.NoResults }}</div>
+      {{ else }}
+        <div class="empty-state">{{ .Page.UI.NoSections }}</div>
+      {{ end }}
+    </main>
+
+    {{ if or .Page.FooterText .Page.FooterHTML }}
+      <footer>
+        {{ if .Page.AllowUnsafeHTML }}{{ .Page.FooterHTML }}{{ else }}{{ .Page.FooterText }}{{ end }}
+      </footer>
+    {{ end }}
+  </div>
+
+  <script>{{ pageJS }}</script>
+</body>
+</html>

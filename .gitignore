@@ -1,0 +1,7 @@
+.gocache/
+coverage
+coverage.out
+dashyreborn
+dashyreborn.exe
+.cache/
+conf.test.yml

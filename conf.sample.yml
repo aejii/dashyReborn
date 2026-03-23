@@ -1,0 +1,39 @@
+pageInfo:
+  title: Sample Dashboard
+  description: Example config for Dashy Reborn
+  navLinks:
+    - title: Repository
+      path: https://example.com
+      target: newtab
+
+appConfig:
+  theme: dracula
+  language: en
+  iconSize: medium
+  layout: auto
+  defaultOpeningMethod: newtab
+
+sections:
+  - name: Infrastructure
+    icon: mdi-server
+    items:
+      - title: Grafana
+        description: Metrics and dashboards
+        url: https://grafana.example.com
+        icon: si-grafana
+      - title: Prometheus
+        description: Time-series database
+        url: https://prometheus.example.com
+        icon: favicon
+
+  - name: Productivity
+    icon: mdi-briefcase
+    items:
+      - title: Documentation
+        description: Internal docs portal
+        url: https://docs.example.com
+        icon: mdi-file-document-outline
+      - title: Tickets
+        description: Work tracking
+        url: https://tickets.example.com
+        icon: generative
