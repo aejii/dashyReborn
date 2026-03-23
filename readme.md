@@ -1,7 +1,12 @@
 # Dashy Reborn
 
-Dashy Reborn is a small Go adaptation of [Dashy](https://github.com/Lissy93/dashy).
+DashyReborn is a small Go adaptation of [Dashy](https://github.com/Lissy93/dashy).
 It reads a Dashy-compatible YAML config and renders a server-side dashboard without a frontend build step.
+
+## Why This Fork
+
+As of early 2026, Dashy rebuilds on every startup, which can drive CPU usage up and noticeably increase startup time.
+This fork exists to provide a simpler Go-based alternative with a much smaller disk and memory footprint
 
 ## Scope
 
